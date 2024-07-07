@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Graph</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div id="live-graph"></div>
+    <script>
+        var graphData = {{ graph_data|safe }};
+
+        var data = [
+            {
+                x: [],
+                y: [],
+                mode: 'lines',
+                line: { color: '#80CAF6' },
+            }
+        ];
+
+        var layout = {
+            title: 'Live Graph',
+            xaxis: { title: 'Time' },
+            yaxis: { title: 'Data' },
+        };
+
+        Plotly.newPlot('live-graph', data, layout);
+
+        // Update the graph with new data
+        setInterval(function() {
+            // Make an AJAX request to fetch new data from the server
+            fetch('data/')  
+                .then(response => response.json())
+                .then(newData => {
+                    if (newData.x && newData.y) {
+                        // Append the new data to the existing data
+                        data[0].x.push(newData.x);
+                        data[0].y.push(newData.y);
+                        // Update the graph with the new data
+                        Plotly.update('live-graph', data, layout);
+                    }
+                })
+                .catch(error => console.error(error));
+        }, 1000);
+    </script>
+</body>
+</html>
+
